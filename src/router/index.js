@@ -12,6 +12,13 @@ import EventService from '@/services/EventService.js'
 import GStore from '@/store'
 import AddEvent from '@/views/EventForm.vue'
 
+import OrganizerDetails from '@/views/organizer/Details.vue'
+import OrganizerRegister from '@/views/organizer/Register.vue'
+import OrganizerEdit from '@/views/organizer/Edit.vue'
+import OrganizerLayout from '@/views/organizer/Layout.vue'
+import AddOrganizer from '@/views/OrganizerForm.vue'
+import OrganizerService from '@/services/OrganizerService.js'
+
 const routes = [
   {
     path: '/',
@@ -28,6 +35,11 @@ const routes = [
     path: '/add-event',
     name: 'AddEvent',
     component: AddEvent
+  },
+  {
+    path: '/add-organizer',
+    name: 'AddOrganizer',
+    component: AddOrganizer
   },
   {
     path: '/event/:id',
@@ -87,6 +99,49 @@ const routes = [
     path: '/network-error',
     name: 'NetworkError',
     component: NetWorkError
+  },
+  {
+    path: '/organizer/:id',
+    name: 'OrganizerLayout',
+    props: true,
+    component: OrganizerLayout,
+    beforeEnter: (to) => {
+      return OrganizerService.getOrganizer(to.params.id) // Return and params.id
+        .then((response) => {
+          // Still need to set the data here
+          GStore.organizer = response.data // <--- Store the event
+        })
+        .catch((error) => {
+          if (error.response && error.response.status == 404) {
+            return {
+              // <--- Return
+              name: '404Resource',
+              params: { resource: 'organizer' }
+            }
+          } else {
+            return { name: 'NetworkError' } // <--- Return
+          }
+        })
+    },
+    children: [
+      {
+        path: '',
+        name: 'OrganizerDetails',
+        component: OrganizerDetails
+      },
+      {
+        path: 'register',
+        name: 'OrganizerRegister',
+        props: true,
+        component: OrganizerRegister
+      },
+      {
+        path: 'edit',
+        name: 'OrganizerEdit',
+        props: true,
+        component: OrganizerEdit
+      }
+    ]
   }
 ]
 
